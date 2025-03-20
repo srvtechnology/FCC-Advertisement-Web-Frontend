@@ -279,7 +279,68 @@ export default function Bookings() {
 
 
 
- 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Payment Data:", formData);
+    const paymentData = new FormData();
+    paymentData.append("booking_id", bookingId);
+    paymentData.append("space_id", spaceId);
+    paymentData.append("amount", amount);
+    paymentData.append("payee_name", formData.payeeName);
+    paymentData.append("payment_date", formData.paymentDate);
+    paymentData.append("payment_mode", formData.paymentMode);
+    paymentData.append("payee_address", formData.payeeAddress);
+    paymentData.append("transaction_id", formData.transactionId);
+    paymentData.append("payment_type", formData.payment_type);
+    paymentData.append("paymentamount", formData.paymentamount)
+
+    // {
+    //   totalData.hasOwnProperty("payment") && totalData.payment != null ?
+    //     paymentData.append("paymentamount", amount) :
+    //     paymentData.append("paymentamount", formData.paymentamount)
+    // }
+    // {
+    //   totalData.hasOwnProperty("payment") && totalData.payment != null ?
+    //     paymentData.append("payment_type", "full") :
+    //     paymentData.append("payment_type", formData.payment_type)
+    // }
+    if (formData.paymentSlip) {
+      paymentData.append("payment_slip", formData.paymentSlip);
+    }
+
+    axiosClient
+      .post("/payments", paymentData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then(() => {
+        alert("Payment successful!");
+        getBookings(); // Refresh the bookings list after payment
+      })
+      .catch((error) => {
+        // console.error("Payment failed:", error);
+        const response = error.response;
+        console.log(response.data.message)
+        if (response && response.status === 422) {
+          setMessage(response.data.message);
+        }
+        alert(response.data.message);
+      });
+    // Call your payment API here
+    handleClose();
+    setFormData({
+      payeeName: "",
+      paymentDate: "",
+      paymentMode: "",
+      payeeAddress: "",
+      transactionId: "",
+      paymentSlip: null,
+      payment_type: "full",
+      paymentamount: amount,
+    });
+  };
+
 
 
 
@@ -428,7 +489,9 @@ export default function Bookings() {
                   <th> Address </th>
                   <th> Booking Date </th>
                   <th> Payment Status </th>
-                  
+                  <th> Total amount </th>
+                  <th> paid </th>
+                  <th>Outstanding Amount</th>
                   <th> Demand Note </th>
                   <th> View </th>
                   <th> Payment Status </th>
@@ -466,7 +529,34 @@ export default function Bookings() {
                             <td> {b.mobile || "N/A"} </td>
                             <td> {b.address || "N/A"} </td>
                             <td> {b.created_at.split("T")[0] || "N/A"} </td>
-                           
+                            <td> {b.hasOwnProperty("payment") && b.payment != null ?
+                              parseInt(b.payments_sum_payment_amount_1) === parseInt(b.payment?.amount) ?
+                                "full" : b.payment?.payment_type : "not paid"} </td>
+                            {/* total  */}
+                            <td>NLe{" "}
+                              {b.hasOwnProperty("payment") && b.payment != null
+                                ? Number(b.payment?.amount).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                : `${Number(
+                                  b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
+                                ).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
+                            </td>
+                            {/* paid */}
+                            <td> NLe{" "}
+                              {b.hasOwnProperty("payment") && b.payment != null
+                                ? Number(b.payments_sum_payment_amount_1).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                : "0"}
+                            </td>
+                            {/* rem */}
+                            <td> NLe{" "}
+                              {b.hasOwnProperty("payment") && b.payment != null
+                                ? Number(b.payment?.amount - b.payments_sum_payment_amount_1).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                : "0"}
+                            </td>
+                            <td>
+                              <button className="btn btn-sm btn-primary" onClick={() => downloadPDF(b.id)}>
+                                Download
+                              </button>
+                            </td>
                             <td>
                               <Link className="btn btn-sm btn-success" to={`/bookings/${b.id}`}>
                                 View
