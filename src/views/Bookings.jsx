@@ -464,7 +464,7 @@ export default function Bookings() {
               onClick={postSelectedIds}
               disabled={selectedIds.length === 0}
             >
-              Selected Booking IDs
+             Download Demand Note
             </button>
 
             <table className="table table-striped">
