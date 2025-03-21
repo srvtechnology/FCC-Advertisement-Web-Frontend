@@ -184,7 +184,7 @@ export default function Bookings() {
     csvRows.push(headers.join(",")); // Add headers
 
     console.log("Total bookings:", bookings.length); // Check total rows
-    const BASE_URL = "${import.meta.env.VITE_API_BASE_URL}/storage/";
+    const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/storage/`;
     bookings.forEach((b, index) => {
       if (!b || Object.keys(b).length === 0) return; // Skip empty objects
 
