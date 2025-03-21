@@ -44,7 +44,7 @@ export default function otp() {
         {/* Logo */}
         <div className="text-center mb-3">
           <img
-            src="https://fccapi.srvtechservices.com/storage/image4.png"
+            src={`${import.meta.env.VITE_API_BASE_URL}/storage/image4.png`}
             alt="Logo"
             style={{ width: "100px", height: "auto" }}
           />

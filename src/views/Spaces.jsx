@@ -87,7 +87,7 @@ export default function Spaces() {
   };
 
   const exportToCSV = () => {
-    const BASE_URL = "https://fccapi.srvtechservices.com/storage/";
+    const BASE_URL = "${import.meta.env.VITE_API_BASE_URL}/storage/";
     if (!spaces.length) return alert("No data to export");
 
     // Convert data to CSV-compatible format

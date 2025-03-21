@@ -72,7 +72,7 @@ export default function PaymentView() {
               <div className="col-md-6">
               <p className="mt-2"><strong>Payment Document</strong></p>
                 <img
-                  src={`https://fccapi.srvtechservices.com/storage/${space.payment_slip}`}
+                  src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.payment_slip}`}
                   alt="Document 2"
                   className="img-fluid rounded border"
                   style={{ maxHeight: "200px", objectFit: "cover" }}
@@ -147,7 +147,29 @@ export default function PaymentView() {
             </div>
           </div>
         </div>
+
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-header bg-dark text-white">payment Documents</div>
+            <div className="card-body text-center">
+              <div className="row">
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.payment_slip}`}
+                    alt="Document 1"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Front view</strong></p>
+                </div>
+                
+
+              
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div >
+    </div>
   );
 }

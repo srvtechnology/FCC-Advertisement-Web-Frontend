@@ -97,7 +97,7 @@ export default function Payments() {
       return;
     }
 
-    const BASE_URL = "https://fccapi.srvtechservices.com/storage/";
+    const BASE_URL = "${import.meta.env.VITE_API_BASE_URL}/storage/";
 
     const csvData = bookings.map((b) => ({
       "Payment ID": "FCC/PMT/" + b.id,

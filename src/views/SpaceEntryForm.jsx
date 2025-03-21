@@ -636,7 +636,7 @@ export default function SpaceEntryForm() {
                           <img
                             src={
                               typeof images[key] === "string"
-                                ? `https://fccapi.srvtechservices.com/storage/${images[key]}` // Backend Image
+                                ? `${import.meta.env.VITE_API_BASE_URL}/storage/${images[key]}` // Backend Image
                                 : URL.createObjectURL(images[key]) // New Preview
                             }
                             alt={`Preview ${key}`}

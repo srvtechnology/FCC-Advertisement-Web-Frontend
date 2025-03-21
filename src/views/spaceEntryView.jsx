@@ -113,7 +113,7 @@ export default function SpaceEntryView() {
               <div className="row">
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_1}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_1}`}
                     alt="Document 1"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}
@@ -122,7 +122,7 @@ export default function SpaceEntryView() {
                 </div>
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_2}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_2}`}
                     alt="Document 2"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}
@@ -132,7 +132,7 @@ export default function SpaceEntryView() {
 
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_3}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_3}`}
                     alt="Document 2"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}

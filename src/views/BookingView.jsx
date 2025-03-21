@@ -127,6 +127,44 @@ export default function BookingView() {
             </div>
           </div>
         </div>
+
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-header bg-dark text-white">space Documents</div>
+            <div className="card-body text-center">
+              <div className="row">
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_1}`}
+                    alt="Document 1"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Front view</strong></p>
+                </div>
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_2}`}
+                    alt="Document 2"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Back view</strong></p>
+                </div>
+
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_3}`}
+                    alt="Document 2"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Whole view</strong></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

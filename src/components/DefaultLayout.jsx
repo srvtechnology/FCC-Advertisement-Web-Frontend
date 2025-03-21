@@ -182,7 +182,7 @@ export default function DefaultLayout() {
                 {/* Logo */}
                 <div className="text-center mb-4">
                     <img
-                        src="https://fccapi.srvtechservices.com/storage/image4.png"
+                        src={`${import.meta.env.VITE_API_BASE_URL}/storage/image4.png`}
                         alt="Logo"
                         className="w-24 h-auto mx-auto"
                     />
