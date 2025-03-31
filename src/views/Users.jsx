@@ -119,8 +119,8 @@ export default function Users() {
       </div>
 
       <div className="card animated fadeInDown table-responsive">
-      <table className="table table-striped">
-      <thead className="table-primary"> {/* Makes header gray */}
+        <table className="table table-striped">
+          <thead className="table-primary">
             <tr>
               <th>User ID</th>
               <th>Name</th>
@@ -130,40 +130,48 @@ export default function Users() {
               <th>Actions</th>
             </tr>
           </thead>
-          {loading && (
+
+          {loading ? (
             <tbody>
               <tr>
                 <td colSpan="6" className="text-center">Loading...</td>
               </tr>
             </tbody>
-          )}
-          {!loading && (
+          ) : (
             <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers
-                  .slice((currentPage - 1) * perPage, currentPage * perPage)
-                  .map((u) => (
-                    <tr key={u.id}>
-                      <td> FCC/US/{u.id}</td>
-                      <td>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td>{u.user_type}</td>
-                      <td>{u.created_at}</td>
-                      <td>
-                        <Link  style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" to={`/users/${u.id}`}>Edit</Link>
-                        &nbsp;
-                        <button  style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center">No users found</td>
-                </tr>
-              )}
+              {filteredUsers
+                .filter((u) => u.name !== "SUPER ADMIN") // Exclude SUPERADMIN users
+                .slice((currentPage - 1) * perPage, currentPage * perPage)
+                .map((u) => (
+                  <tr key={u.id}>
+                    <td>FCC/US/{u.id}</td>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>{u.user_type}</td>
+                    <td>{u.created_at}</td>
+                    <td>
+                      <Link
+                        style={{ marginRight: "10px" }}
+                        className="btn btn-sm btn-primary w-24 text-center"
+                        to={`/users/${u.id}`}
+                      >
+                        Edit
+                      </Link>
+                      &nbsp;
+                      {/* <button
+                        style={{ marginRight: "10px" }}
+                        className="btn btn-sm btn-danger w-24 text-center"
+                        onClick={() => onDeleteClick(u)}
+                      >
+                        Delete
+                      </button> */}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           )}
         </table>
+
 
         {/* Pagination Controls */}
         <div className="d-flex justify-content-center align-items-center mt-3">
@@ -186,6 +194,6 @@ export default function Users() {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

@@ -109,7 +109,7 @@ export default function BookingView() {
               <p><strong>No. of Sides:</strong> {space.space.no_advertisement_sides}</p>
               <p><strong>Clearance Height:</strong> {space.space.clearance_height_advertise}</p>
               <p><strong>Illumination:</strong> {space.space.illuminate_nonilluminate}</p>
-              <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p>
+              {/* <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p> */}
             </div>
           </div>
         </div>
