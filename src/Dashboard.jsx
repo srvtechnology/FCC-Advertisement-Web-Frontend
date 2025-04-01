@@ -23,6 +23,20 @@ function Dashboard() {
     payments_count: 0,
   });
 
+   const [bookings, setBookings] = useState([]);
+    const [bookingLoading, setBookingLoading] = useState(false);
+    const [bookingTimeRange, setBookingTimeRange] = useState("month");
+    const [bookingAgent, setBookingAgent] = useState("all");
+    const [bookingChartData, setBookingChartData] = useState({
+      labels: [],
+      datasets: []
+    });
+    const [agentBookingChartData, setAgentBookingChartData] = useState({
+      labels: [],
+      datasets: []
+    });
+    const [bookingAgents, setBookingAgents] = useState([]);
+
   // State for user analytics
   const [users, setUsers] = useState([]);
   const [userLoading, setUserLoading] = useState(false);
@@ -56,6 +70,7 @@ function Dashboard() {
     fetchCounts();
     fetchUsers();
     fetchSpaces();
+    fetchBookings();
   }, []);
 
   // Prepare user charts when users or time range changes
@@ -96,6 +111,104 @@ function Dashboard() {
         setUsers([]);
       });
   };
+
+  // Add this new function to fetch bookings
+  const fetchBookings = (agentName = "", startDate = "", endDate = "") => {
+    setBookingLoading(true);
+    axiosClient
+      .get("/bookings", {
+        params: { 
+          agent_name: agentName === "all" ? "" : agentName, 
+          start_date: startDate, 
+          end_date: endDate 
+        },
+      })
+      .then(({ data }) => {
+        setBookingLoading(false);
+        setBookings(data.data || []);
+        extractUniqueBookingAgents(data.data || []);
+      })
+      .catch(() => {
+        setBookingLoading(false);
+        setBookings([]);
+      });
+  };
+
+  // Extract unique booking agents
+  const extractUniqueBookingAgents = (bookingsData) => {
+    const uniqueAgents = new Set();
+
+    bookingsData.forEach(booking => {
+      const agent = booking.space?.name_of_advertise_agent_company_or_person ?? "N/A";
+      uniqueAgents.add(agent);
+    });
+
+    setBookingAgents(Array.from(uniqueAgents).sort());
+  };
+
+  // Prepare booking chart data
+  const prepareBookingChartData = () => {
+    let filteredBookings = bookings;
+
+    // Filter by selected agent if not "all"
+    if (bookingAgent !== "all") {
+      filteredBookings = bookings.filter(booking => {
+        const agent = booking.space?.name_of_advertise_agent_company_or_person ?? "N/A";
+        return agent === bookingAgent;
+      });
+    }
+
+    const { labels, counts } = prepareTimeBasedData(filteredBookings, bookingTimeRange);
+
+    setBookingChartData({
+      labels,
+      datasets: [
+        {
+          label: bookingAgent === "all" ? 'All Bookings' : `Bookings by ${bookingAgent}`,
+          data: counts,
+          backgroundColor: 'rgba(255, 159, 64, 0.5)',
+          borderColor: 'rgba(255, 159, 64, 1)',
+          borderWidth: 1,
+        },
+      ],
+    });
+  };
+
+  // Prepare agent-wise booking chart data
+  const prepareAgentBookingChartData = () => {
+    // Group bookings by agent
+    const agentCounts = {};
+
+    bookings.forEach(booking => {
+      const agent = booking.space?.name_of_advertise_agent_company_or_person ?? "N/A";
+      agentCounts[agent] = (agentCounts[agent] || 0) + 1;
+    });
+
+    const sortedAgents = Object.keys(agentCounts).sort((a, b) => agentCounts[b] - agentCounts[a]);
+    const topAgents = sortedAgents.slice(0, 5); // Show top 5 agents
+
+    setAgentBookingChartData({
+      labels: topAgents,
+      datasets: [
+        {
+          label: 'Bookings per Agent',
+          data: topAgents.map(agent => agentCounts[agent]),
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1,
+        },
+      ],
+    });
+  };
+
+  // Update booking charts when bookings or filters change
+  useEffect(() => {
+    if (bookings.length > 0) {
+      prepareBookingChartData();
+      prepareAgentBookingChartData();
+    }
+  }, [bookings, bookingTimeRange, bookingAgent]);
+
 
   // Fetch spaces data
   const fetchSpaces = () => {
@@ -502,6 +615,102 @@ function Dashboard() {
           </div>
         </div>
       </section>
+
+       {/* Bookings Analytics Section */}
+            <section className="analytics-section">
+              <h2 className="section-title">Booking Analytics</h2>
+              
+              <div className="controls-row">
+                <div className="time-range-selector">
+                  <button
+                    className={bookingTimeRange === "day" ? "active" : ""}
+                    onClick={() => setBookingTimeRange("day")}
+                  >
+                    Daily
+                  </button>
+                  <button
+                    className={bookingTimeRange === "month" ? "active" : ""}
+                    onClick={() => setBookingTimeRange("month")}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    className={bookingTimeRange === "6month" ? "active" : ""}
+                    onClick={() => setBookingTimeRange("6month")}
+                  >
+                    6 Months
+                  </button>
+                  <button
+                    className={bookingTimeRange === "year" ? "active" : ""}
+                    onClick={() => setBookingTimeRange("year")}
+                  >
+                    Yearly
+                  </button>
+                </div>
+      
+                <div className="agent-selector">
+                  <label htmlFor="booking-agent-filter">Filter by Agent:</label>
+                  <select
+                    id="booking-agent-filter"
+                    value={bookingAgent}
+                    onChange={(e) => setBookingAgent(e.target.value)}
+                  >
+                    <option value="all">All Agents</option>
+                    {bookingAgents.map(agent => (
+                      <option key={agent} value={agent}>{agent}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="charts-container">
+                <div className="chart-card">
+                  <h3>Booking Trends</h3>
+                  {bookingLoading ? (
+                    <div className="loading-indicator">Loading booking data...</div>
+                  ) : (
+                    <Bar
+                      data={bookingChartData}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            position: 'top',
+                          },
+                          title: {
+                            display: true,
+                            text: `Bookings (${getTimeRangeText(bookingTimeRange)})`,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+                
+                <div className="chart-card">
+                  <h3>Top Agents by Bookings</h3>
+                  {bookingLoading ? (
+                    <div className="loading-indicator">Loading booking data...</div>
+                  ) : (
+                    <Bar
+                      data={agentBookingChartData}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            position: 'top',
+                          },
+                          title: {
+                            display: true,
+                            text: 'Total Bookings per Agent',
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </section>
     </div>
   );
 }
