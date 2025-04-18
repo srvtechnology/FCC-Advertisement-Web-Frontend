@@ -569,7 +569,7 @@ function Dashboard() {
         
         <div className="charts-container">
           <div className="chart-card">
-            <h3>Space Creation Trends</h3>
+            <h3>Agent VS Space Creation</h3>
             {spaceLoading ? (
               <div className="loading-indicator">Loading space data...</div>
             ) : (
@@ -665,7 +665,7 @@ function Dashboard() {
               
               <div className="charts-container">
                 <div className="chart-card">
-                  <h3>Booking Trends</h3>
+                  <h3>Agent VS Bookings</h3>
                   {bookingLoading ? (
                     <div className="loading-indicator">Loading booking data...</div>
                   ) : (
