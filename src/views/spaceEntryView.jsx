@@ -87,7 +87,7 @@ export default function SpaceEntryView() {
               <p><strong>No. of Sides:</strong> {space.no_advertisement_sides}</p>
               <p><strong>Clearance Height:</strong> {space.clearance_height_advertise}</p>
               <p><strong>Illumination:</strong> {space.illuminate_nonilluminate}</p>
-              <p><strong>Certified Georgia Licensed:</strong> {space.certified_georgia_licensed ? "Yes" : "No"}</p>
+              {/* <p><strong>Certified Georgia Licensed:</strong> {space.certified_georgia_licensed ? "Yes" : "No"}</p> */}
             </div>
           </div>
         </div>

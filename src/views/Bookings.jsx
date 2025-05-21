@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
 import { Link } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
+//step-1
+import { getUserPermissions } from "./getUserPermissions.js";
+import { formatPermissions } from "./formatPermissions.js";
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
@@ -36,44 +39,62 @@ export default function Bookings() {
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
 
+  const [permissions, setPermissions] = useState({}); // step 2
+  // step-3
+  useEffect(() => {
+    const loadPermissions = async () => {
+      const raw = await getUserPermissions();
+      // console.log(raw)
+      const formatted = formatPermissions(raw);
+      setPermissions(formatted);
+    };
+
+    loadPermissions();
+  }, []);
+
+  //step-4
+  const can = (module, action) => {
+    return permissions[module]?.has(action);
+  };
+
   useEffect(() => {
     fetchAgents();
   }, []);
 
   useEffect(() => {
     if (!bookings || bookings.length === 0) return;
-  
+
     let total = 0;
     let paid = 0;
     let pending = 0;
-  
+
     bookings.forEach((b) => {
       // Calculate the total amount
       let amount = b.hasOwnProperty("payment") && b.payment != null
         ? Number(b.payment?.amount) || 0
         : Number(
-            b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
-          );
-  
+          b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
+        );
+
       total += amount;
-  
+
       // Calculate paid amount
       let paidAmount = b.hasOwnProperty("payment") && b.payment != null
         ? Number(b.payments_sum_payment_amount_1) || 0
         : 0;
-  
+
       paid += paidAmount;
-  
+
       // Calculate remaining amount
       let remainingAmount = amount - paidAmount;
       pending += remainingAmount;
     });
-  
+
     setTotalAmount(total);
     setPaidAmount(paid);
     setAmountToPay(pending);
   }, [bookings]);
-  
+
 
   const fetchAgents = () => {
     axiosClient
@@ -247,7 +268,9 @@ export default function Bookings() {
             minimumFractionDigits: 0,
             maximumFractionDigits: 2,
           })
-          : "0",
+          : `${Number(
+            b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
+          ).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
         b.hasOwnProperty("payment") && b.payment != null
           ? Number(b.payments_sum_payment_amount_1).toLocaleString("en-US", {
             minimumFractionDigits: 0,
@@ -259,7 +282,9 @@ export default function Bookings() {
             minimumFractionDigits: 0,
             maximumFractionDigits: 2,
           })
-          : "0",
+          : `${Number(
+            b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
+          ).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
 
       ];
 
@@ -396,56 +421,58 @@ export default function Bookings() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="mb-0">Bookings</h1>
         {/* {message && <div className="alert alert-danger">{message}</div>} */}
-        <div className="d-flex gap-2 align-items-center">{/* Agent Dropdown */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">Agent</label>
-            <select
-              value={selectedAgent}
-              onChange={(e) => setSelectedAgent(e.target.value)}
-              className="form-control form-control-sm"
-            >
-              <option value="">Select an option</option>
-              {agents?.map((option, index) => (
-                <option key={index} value={option?.name}>
-                  {option?.name}
-                </option>
-              ))}
-            </select>
+        {can('manage_booking', 'list') && (
+          <div className="d-flex gap-2 align-items-center">{/* Agent Dropdown */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">Agent</label>
+              <select
+                value={selectedAgent}
+                onChange={(e) => setSelectedAgent(e.target.value)}
+                className="form-control form-control-sm"
+              >
+                <option value="">Select an option</option>
+                {agents?.map((option, index) => (
+                  <option key={index} value={option?.name}>
+                    {option?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ width: "150px" }}
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ width: "150px" }}
+              />
+            </div>
+
+            {/* Search Button */}
+            <button style={{ marginTop: "20px" }} className="btn btn-sm  btn-success" onClick={handleSearch}>
+              Search
+            </button>
+
+            {/*Export Button */}
+            <button style={{ float: "right", marginTop: "35px", marginRight: "30px" }} className="btn btn-sm  btn-warning mb-3" onClick={exportToCSV}>Export</button>
+
           </div>
-
-          {/* Start Date */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="form-control form-control-sm"
-              style={{ width: "150px" }}
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="form-control form-control-sm"
-              style={{ width: "150px" }}
-            />
-          </div>
-
-          {/* Search Button */}
-          <button style={{ marginTop: "20px" }} className="btn btn-sm  btn-success" onClick={handleSearch}>
-            Search
-          </button>
-
-          {/*Export Button */}
-          <button style={{ float: "right", marginTop: "35px", marginRight: "30px" }} className="btn btn-sm  btn-warning mb-3" onClick={exportToCSV}>Export</button>
-
-        </div>
+        )}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", padding: "10px", fontWeight: "bold" }}>
         <span>Total Amount: NLe {totalAmount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
@@ -464,7 +491,7 @@ export default function Bookings() {
               onClick={postSelectedIds}
               disabled={selectedIds.length === 0}
             >
-             Download Demand Note
+              Download Demand Note
             </button>
 
             <table className="table table-striped">
@@ -550,51 +577,61 @@ export default function Bookings() {
                             <td> NLe{" "}
                               {b.hasOwnProperty("payment") && b.payment != null
                                 ? Number(b.payment?.amount - b.payments_sum_payment_amount_1).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })
-                                : "0"}
+                                : `${Number(
+                                  b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0
+                                ).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
                             </td>
                             <td>
-                              <button className="btn btn-sm btn-primary" onClick={() => downloadPDF(b.id)}>
-                                Download
-                              </button>
+                              {can('manage_booking', 'view') && (
+                                <button className="btn btn-sm btn-primary" onClick={() => downloadPDF(b.id)}>
+                                  Download
+                                </button>
+                              )}
                             </td>
                             <td>
-                              <Link className="btn btn-sm btn-success" to={`/bookings/${b.id}`}>
-                                View
-                              </Link>
+                              {can('manage_booking', 'view') && (
+                                <Link className="btn btn-sm btn-success" to={`/bookings/${b.id}`}>
+                                  View
+                                </Link>
+                              )}
                             </td>
                             <td>
-                              {
-                                b.status === "pending" ? (
-                                  <button
-                                    className="btn btn-sm btn-warning"
-                                    onClick={() =>
-                                      PayforSpace(b, b.id, b.space?.id, b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1))
-                                    }
-                                  >
-                                    Pay {`NLe ${Number(b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0)
-                                      .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
+                              {can('manage_booking', 'edit') && (
+                                <>
+                                  {
+                                    b.status === "pending" ? (
+                                      <button
+                                        className="btn btn-sm btn-warning"
+                                        onClick={() =>
+                                          PayforSpace(b, b.id, b.space?.id, b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1))
+                                        }
+                                      >
+                                        Pay {`NLe ${Number(b.space?.rate * b.space?.area_advertise * parseInt(b.space?.other_advertisement_sides_no ?? 1) || 0)
+                                          .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
 
-                                  </button>
-                                ) : b.hasOwnProperty("payment") && b.payment != null && b.payment.payment_type == "partial" &&
-                                  parseInt(b.payments_sum_payment_amount_1) < parseInt(b.payment?.amount) ?
-                                  (
-                                    <button
-                                      className="btn btn-sm"
-                                      style={{ background: "#ffd453" }}
-                                      onClick={() =>
-                                        PayforSpace(b, b.id, b.space?.id, (b.payment?.amount - b.payments_sum_payment_amount_1))
-                                      }
-                                    >
-                                      Pay {`NLe ${Number((b.payment?.amount - b.payments_sum_payment_amount_1) || 0)
-                                        .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
+                                      </button>
+                                    ) : b.hasOwnProperty("payment") && b.payment != null && b.payment.payment_type == "partial" &&
+                                      parseInt(b.payments_sum_payment_amount_1) < parseInt(b.payment?.amount) ?
+                                      (
+                                        <button
+                                          className="btn btn-sm"
+                                          style={{ background: "#ffd453" }}
+                                          onClick={() =>
+                                            PayforSpace(b, b.id, b.space?.id, (b.payment?.amount - b.payments_sum_payment_amount_1))
+                                          }
+                                        >
+                                          Pay {`NLe ${Number((b.payment?.amount - b.payments_sum_payment_amount_1) || 0)
+                                            .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
 
-                                    </button>
-                                  )
-                                  :
-                                  (
-                                    <button className="btn btn-sm btn-secondary" > Paid </button>
-                                  )
-                              }
+                                        </button>
+                                      )
+                                      :
+                                      (
+                                        <button className="btn btn-sm btn-secondary" > Paid </button>
+                                      )
+                                  }
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))

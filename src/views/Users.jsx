@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
 import { Link } from "react-router-dom";
 import { useStateContext } from "../context/ContextProvider.jsx";
+//step-1
+import { getUserPermissions } from "./getUserPermissions.js";
+import { formatPermissions } from "./formatPermissions.js";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -15,6 +18,24 @@ export default function Users() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userTypeFilter, setUserTypeFilter] = useState("All"); // Filter state
   const perPage = 10;
+
+  const [permissions, setPermissions] = useState({}); // step 2
+  // step-3
+  useEffect(() => {
+    const loadPermissions = async () => {
+      const raw = await getUserPermissions();
+      // console.log(raw)
+      const formatted = formatPermissions(raw);
+      setPermissions(formatted);
+    };
+
+    loadPermissions();
+  }, []);
+
+  //step-4
+  const can = (module, action) => {
+    return permissions[module]?.has(action);
+  };
 
   useEffect(() => {
     getUsers();
@@ -81,46 +102,50 @@ export default function Users() {
       {/* Header, Search, Filter, and Export Button */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <h1>Users</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <input
-            type="text"
-            placeholder="Search by Name or Email Address"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "250px",
-              padding: "5px 10px",
-              fontSize: "14px",
-              borderRadius: "5px",
-              border: "1px solid #ccc"
-            }}
-          />
-          <label style={{ fontSize: "14px", fontWeight: "bold", marginRight: "10px" }}>
-            User Type:
-          </label>
-          <select
-            value={userTypeFilter}
-            onChange={(e) => setUserTypeFilter(e.target.value)}
-            style={{
-              padding: "5px 10px",
-              fontSize: "14px",
-              borderRadius: "5px",
-              border: "1px solid #ccc"
-            }}
-          >
+        {can('manage_user', 'list') && (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <input
+              type="text"
+              placeholder="Search by Name or Email Address"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "250px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                borderRadius: "5px",
+                border: "1px solid #ccc"
+              }}
+            />
+            <label style={{ fontSize: "14px", fontWeight: "bold", marginRight: "10px" }}>
+              User Type:
+            </label>
+            <select
+              value={userTypeFilter}
+              onChange={(e) => setUserTypeFilter(e.target.value)}
+              style={{
+                padding: "5px 10px",
+                fontSize: "14px",
+                borderRadius: "5px",
+                border: "1px solid #ccc"
+              }}
+            >
 
-            <option value="All">All</option>
-            <option value="agent">Agent</option>
-            <option value="system">System</option>
-          </select>
-          <button onClick={exportToCSV} style={{ marginRight: "10px" }} className="btn btn-sm  btn-warning">Export</button>
-          <Link style={{ marginRight: "10px" }} className="btn btn-sm  btn-primary" to="/users/new">Add New</Link>
-        </div>
+              <option value="All">All</option>
+              <option value="agent">Agent</option>
+              <option value="system">System</option>
+            </select>
+            <button onClick={exportToCSV} style={{ marginRight: "10px" }} className="btn btn-sm  btn-warning">Export</button>
+            {can('manage_user', 'add') && (
+              <Link style={{ marginRight: "10px" }} className="btn btn-sm  btn-primary" to="/users/new">Add New</Link>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="card animated fadeInDown table-responsive">
-      <table className="table table-striped">
-      <thead className="table-primary"> {/* Makes header gray */}
+        <table className="table table-striped">
+          <thead className="table-primary">
             <tr>
               <th>User ID</th>
               <th>Name</th>
@@ -130,40 +155,50 @@ export default function Users() {
               <th>Actions</th>
             </tr>
           </thead>
-          {loading && (
+
+          {loading ? (
             <tbody>
               <tr>
                 <td colSpan="6" className="text-center">Loading...</td>
               </tr>
             </tbody>
-          )}
-          {!loading && (
+          ) : (
             <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers
-                  .slice((currentPage - 1) * perPage, currentPage * perPage)
-                  .map((u) => (
-                    <tr key={u.id}>
-                      <td> FCC/US/{u.id}</td>
-                      <td>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td>{u.user_type}</td>
-                      <td>{u.created_at}</td>
-                      <td>
-                        <Link  style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" to={`/users/${u.id}`}>Edit</Link>
-                        &nbsp;
-                        <button  style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center">No users found</td>
-                </tr>
-              )}
+              {filteredUsers
+                .filter((u) => u.name !== "SUPER ADMIN") // Exclude SUPERADMIN users
+                .slice((currentPage - 1) * perPage, currentPage * perPage)
+                .map((u) => (
+                  <tr key={u.id}>
+                    <td>FCC/US/{u.id}</td>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>{u.user_type}</td>
+                    <td>{u.created_at}</td>
+                    <td>
+                      {can('manage_user', 'edit') && (
+                        <Link
+                          style={{ marginRight: "10px" }}
+                          className="btn btn-sm btn-primary w-24 text-center"
+                          to={`/users/${u.id}`}
+                        >
+                          Edit
+                        </Link>
+                      )}
+                      &nbsp;
+                      {/* <button
+                        style={{ marginRight: "10px" }}
+                        className="btn btn-sm btn-danger w-24 text-center"
+                        onClick={() => onDeleteClick(u)}
+                      >
+                        Delete
+                      </button> */}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           )}
         </table>
+
 
         {/* Pagination Controls */}
         <div className="d-flex justify-content-center align-items-center mt-3">
@@ -186,6 +221,6 @@ export default function Users() {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

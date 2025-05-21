@@ -5,7 +5,7 @@ import { useStateContext } from "../context/ContextProvider.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const emailRef = createRef();
   const passwordRef = createRef();
   const { setUser, setToken } = useStateContext();
@@ -40,17 +40,25 @@ export default function Login() {
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div className="card shadow p-4" style={{ width: "350px" }}>
+      <div className="card shadow p-4" style={{ width: "570px" }}>
         {/* Logo */}
         <div className="text-center mb-3">
           <img
             src={`${import.meta.env.VITE_API_BASE_URL}/storage/image4.png`}
             alt="Logo"
-            style={{ width: "100px", height: "auto" }}
+            style={{ width: "160px", height: "auto" }}
           />
+
+          <h1 style={{ color: 'rgb(151 43 169)', fontWeight: 'bold', margin: '8px 0 0 0' }}>
+            FREETOWN CITY COUNCIL
+          </h1>
+          <h2 style={{ color: 'rgb(151 43 169)', fontWeight: 'bold', fontSize: '22px', margin: '4px 0 20px 0' }}>
+            Advertisement Management System
+          </h2>
         </div>
 
-        <h2 className="text-center mb-4">Login</h2>
+        <h2 style={{ fontWeight: 'bold', }} className="text-left mb-4">Login</h2>
+
 
         {message && <div className="alert alert-danger">{message}</div>}
 

@@ -42,9 +42,9 @@ export default function SpaceEntryForm() {
     landlord_street_address: '',
     landlord_telephone: '',
     landlord_email: '',
-    business_name:'',
-    business_address:'',
-    business_contact:'',
+    business_name: '',
+    business_address: '',
+    business_contact: '',
   });
 
   const [errors, setErrors] = useState(null);
@@ -134,7 +134,7 @@ export default function SpaceEntryForm() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
+          const coords = `${position.coords.latitude} ${position.coords.longitude}`;
           setSpace({ ...space, gps_cordinate: coords });
         },
         (error) => {
@@ -452,16 +452,77 @@ export default function SpaceEntryForm() {
                       onChange={ev => setSpace({ ...space, type_of_advertisement: ev.target.value })}
                     >
                       <option value="" disabled>Select Type of Advertisement</option>
-                      <option value="Ordinary Billboards">Ordinary Billboards</option>
+                      {/* <option value="Ordinary Billboards">Ordinary Billboards</option>
+                      <option value="Static Billboard">Static Billboard</option>
+                      <option value="LED Billboard">LED Billboard</option>
                       <option value="Digital Billboard">Digital Billboard</option>
                       <option value="Mobile Billboards">Mobile Billboards</option>
-                      <option value="Indoors Billboards">Indoors Billboards</option>
-                      <option value="Outdoor Billboards">Outdoor Billboards</option>
+
+                      <option value="Bus Shelters">Bus Shelters</option>
+                      <option value="Benches">Benches</option>
+                      <option value="Kiosks">Kiosks</option>
+                      <option value="Trash Bins">Trash Bins</option>
+
+
+                      <option value="Bus Advertising">Bus Advertising</option>
+                      <option value="Taxi Advertising">Taxi Advertising</option>
+                      <option value="Sidewalk Signs">Sidewalk Signs</option>
+                      <option value="Street Art Advertising">Street Art Advertising</option>
+
+                      <option value="Projection Advertising">Projection Advertising</option>
+                      <option value="Building Wraps Advertising">Building Wraps Advertising</option>
+                      <option value="Bridge and Overpass Banners">Bridge and Overpass Banners</option>
                       <option value="Wall Branding">Wall Branding</option>
+                      <option value="Light Boxes">Light Boxes</option>
+                      <option value="Roundabouts">Roundabouts</option>
+
+                      <option value="Lampposts">Lampposts</option>
+                      <option value="Wall Panels">Wall Panels</option>
+                      <option value="Banners">Banners</option>
+
+                      <option value="Outdoor Billboards">Outdoor Billboards</option>
                       <option value="Sign Post">Sign Post</option>
                       <option value="Posters">Posters</option>
                       <option value="Wallscape">Wallscape</option>
                       <option value="Backlit Billboard">Backlit Billboard</option>
+                      <option value="Point of Sale">Point of Sale</option>
+                      <option value="Retail Advertisement">Retail Advertisement</option>
+                      <option value="Other">Other</option> */}
+
+
+                      <option value="Static Billboard">Static Billboard</option>
+                      <option value="Digital Billboard">Digital Billboard</option>
+                      <option value="LED Billboard">LED Billboard</option>
+                      <option value="Mobile Billboard">Mobile Billboard</option>
+
+                      <option value="Bus Shelters">Bus Shelters</option>
+                      <option value="Benches">Benches</option>
+                      <option value="Kiosks">Kiosks</option>
+                      <option value="Trash Bins">Trash Bins</option>
+
+                      <option value="Bus Advertising">Bus Advertising</option>
+                      <option value="Taxi Advertising">Taxi Advertising</option>
+
+                      <option value="Sidewalk Signs">Sidewalk Signs</option>
+
+                      <option value="Street Art Advertising">Street Art Advertising</option>
+                      <option value="Projection Advertising">Projection Advertising</option>
+
+                      <option value="Building Wraps Advertising">Building Wraps Advertising</option>
+                      <option value="Bridge and Overpass Banners">Bridge and Overpass Banners</option>
+                      <option value="Wall Branding">Wall Branding</option>
+
+                      <option value="Light Boxes">Light Boxes</option>
+                      <option value="Roundabouts">Roundabouts</option>
+                      <option value="Lampposts">Lampposts</option>
+                      <option value="Wall Panels">Wall Panels</option>
+                      <option value="Banners">Banners</option>
+                      <option value="Totem Advertisement">Totem Advertisement</option>
+                      <option value="Wallscapes and Murals">Wallscapes and Murals</option>
+                      <option value="Pole Banners / Light Pole">Pole Banners / Light Pole</option>
+                      <option value="Mall and Stadium Advertisement">Mall and Stadium Advertisement</option>
+                      <option value="Signpost">Signpost</option>
+                      <option value="Posters">Posters</option>
                       <option value="Point of Sale">Point of Sale</option>
                       <option value="Retail Advertisement">Retail Advertisement</option>
                       <option value="Other">Other</option>
@@ -567,6 +628,7 @@ export default function SpaceEntryForm() {
                       <option value="">Select an option</option>
                       <option value="Single">Single</option>
                       <option value="Double">Double</option>
+                      <option value="Sides Not Applicable">Sides Not Applicable</option>
                       <option value="V-shaped">V-shaped</option>
                       <option value="Multiple message">Multiple message</option>
                       <option value="Wall branding">Wall branding</option>

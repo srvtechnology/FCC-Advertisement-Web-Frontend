@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
 import { Link } from "react-router-dom";
+//step-1
+import { getUserPermissions } from "./getUserPermissions.js";
+import { formatPermissions } from "./formatPermissions.js";
 
 export default function Payments() {
   const [bookings, setBookings] = useState([]);
@@ -12,6 +15,24 @@ export default function Payments() {
   const [selectedAgent, setSelectedAgent] = useState("");
   const [bookingIds, setBookingIds] = useState([]);
   const [selectedBookId, setSelectedBookId] = useState("");
+
+  const [permissions, setPermissions] = useState({}); // step 2
+  // step-3
+  useEffect(() => {
+    const loadPermissions = async () => {
+      const raw = await getUserPermissions();
+      // console.log(raw)
+      const formatted = formatPermissions(raw);
+      setPermissions(formatted);
+    };
+
+    loadPermissions();
+  }, []);
+
+  //step-4
+  const can = (module, action) => {
+    return permissions[module]?.has(action);
+  };
 
 
   useEffect(() => {
@@ -30,7 +51,7 @@ export default function Payments() {
     setLoading(true);
     axiosClient
       .get("/payments", {
-        params: { agent_name: selectedAgent, start_date: startDate, end_date: endDate,selectedBookId:selectedBookId },
+        params: { agent_name: selectedAgent, start_date: startDate, end_date: endDate, selectedBookId: selectedBookId },
       })
       .then(({ data }) => {
         setLoading(false);
@@ -173,13 +194,14 @@ export default function Payments() {
 
   return (
     <div>
+      {can('manage_payment', 'list') && (
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="mb-0">Payments</h1>
 
         <div className="d-flex gap-2">
 
-        {/* Booking Dropdown */}
-        <div className="d-flex flex-column">
+          {/* Booking Dropdown */}
+          <div className="d-flex flex-column">
             <label className="small text-muted">Booking Id</label>
             <select
               value={selectedBookId}
@@ -189,7 +211,7 @@ export default function Payments() {
               <option value="">Select an option</option>
               {bookingIds?.map((option, index) => (
                 <option key={index} value={option}>
-                FCC/BK/{option}
+                  FCC/BK/{option}
                 </option>
               ))}
             </select>
@@ -248,6 +270,7 @@ export default function Payments() {
           </button>
         </div>
       </div>
+      )}
 
 
 
@@ -303,9 +326,11 @@ export default function Payments() {
                       <td>{b?.payment_date || "N/A"}</td>
                       <td>{b?.status || "N/A"}</td>
                       <td>
-                        <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-success w-24 text-center" to={`/payments/${b.id}`}>
-                          View
-                        </Link>
+                        {can('manage_payment', 'view') && (
+                          <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-success w-24 text-center" to={`/payments/${b.id}`}>
+                            View
+                          </Link>
+                        )}
                       </td>
                       {/* <td>
                     <button  style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => downloadExcel(b.id)}>
@@ -313,9 +338,11 @@ export default function Payments() {
                     </button>
                   </td> */}
                       <td>
+                      {can('manage_payment', 'view') && (
                         <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => downloadReceipt(b.id)}>
                           Receipt
                         </button>
+                      )}
                       </td>
                     </tr>
                   ))

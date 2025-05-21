@@ -1,38 +1,46 @@
 import { Navigate } from "react-router-dom";
-import { useStateContext } from "../context/ContextProvider"; // Import your context
+import { useStateContext } from "../context/ContextProvider";
 import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
+import { getUserPermissions } from "../views/getUserPermissions.js";
 
-function ProtectedRoute({ children, allowedRoles }) {
-    const { token } = useStateContext();
+
+function ProtectedRoute({ children, allowedRoles, requiredPermission }) {
+    const { token, user } = useStateContext();
     const [userRoles, setUserRoles] = useState([]);
+    const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
+
+  
 
     useEffect(() => {
         let isMounted = true;
 
-        if (token) {
-            axiosClient
-                .get("/user")
-                .then(({ data }) => {
-                    if (isMounted) {
-                        setUserRoles(data.roles.map((role) => role.name));
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching user roles:", error);
-                })
-                .finally(() => {
-                    if (isMounted) {
-                        setLoading(false);
-                    }
-                });
-        } else {
-            setLoading(false);
-        }
+        const loadData = async () => {
+            try {
+                if (token) {
+                    // Load user roles
+                    const userData = await axiosClient.get("/user");
+                    // console.log((userData.data.role.name || '').toLowerCase())
+                    // if (isMounted) setUserRoles(userData.data.roles?.map(role => role.name) || []);
+                    if (isMounted) setUserRoles((userData.data.role.name || '').toLowerCase());
+
+                    
+                    // Load permissions
+                    const permData = await getUserPermissions();
+                    if (isMounted) setPermissions(permData || []);
+                }
+            } catch (error) {
+                console.error("Error loading auth data:", error);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadData();
 
         return () => {
-            isMounted = false; // Cleanup to prevent setting state on unmounted component
+            isMounted = false;
         };
     }, [token]);
 
@@ -44,8 +52,19 @@ function ProtectedRoute({ children, allowedRoles }) {
         return <Navigate to="/login" replace />;
     }
 
-    if (allowedRoles.length > 0 && !allowedRoles.some((role) => userRoles.includes(role))) {
-        return <Navigate to="/unauthorized" replace />;
+    // Check if user has the required role
+    const hasRole = allowedRoles?.length === 0 || 
+                   allowedRoles?.some(role => userRoles.includes(role));
+
+    // Check if user has the required permission
+    const hasPermission = !requiredPermission || 
+                        permissions.some(perm => 
+                            perm.module === requiredPermission.module && 
+                            perm.action === requiredPermission.action
+                        );
+
+    if (!hasRole || !hasPermission) {
+        return <Navigate to="/not-found" replace />;
     }
 
     return children;

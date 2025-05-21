@@ -40,16 +40,31 @@ export default function UserForm() {
 
   const fetchRoles = () => {
     axiosClient
-      .get("/roles")
-      .then(({ data }) => setRoles(data.roles)) // Access roles from data object
+      .get("/roles-new")
+      .then(({ data }) => {
+        const filteredRoles = data.data.filter(role => role.name.toLowerCase() !== 'super admin');
+        setRoles(filteredRoles);
+    })
       .catch(console.error);
   };
 
   const onSubmit = (ev) => {
     ev.preventDefault();
-    if (user.id) {
+    
+    // Prepare the user data to send
+    const userData = {...user};
+    
+    // For agents, set default password if not provided
+    if (userData.user_type === 'agent') {
+      if (!userData.password) {
+        userData.password = 'Demo@123@';
+        userData.password_confirmation = 'Demo@123@';
+      }
+    }
+
+    if (userData.id) {
       axiosClient
-        .put(`/users/${user.id}`, user)
+        .put(`/users/${userData.id}`, userData)
         .then(() => {
           setNotification("User was successfully updated");
           navigate("/users");
@@ -62,7 +77,7 @@ export default function UserForm() {
         });
     } else {
       axiosClient
-        .post("/users", user)
+        .post("/users", userData)
         .then(() => {
           setNotification("User was successfully created");
           navigate("/users");
@@ -108,29 +123,9 @@ export default function UserForm() {
                   placeholder="Email"
                 />
               </div>
-              {user.user_type == "agent" ?
+              
+              {user.user_type !== "agent" && (
                 <>
-                  <div style={{ display: "none" }}>
-                    <label>Password </label>
-                    <input
-                      type="password"
-                      onChange={(ev) => setUser({ ...user, password: ev.target.value })}
-                      placeholder="Password"
-                      value={11111111}
-                    />
-                  </div>
-                  <div style={{ display: "none" }}>
-                    <label>Confirm Password</label>
-                    <input
-                      type="password"
-                      onChange={(ev) => setUser({ ...user, password_confirmation: ev.target.value })}
-                      placeholder="Password Confirmation"
-                      value={11111111}
-                    />
-                  </div>
-
-                </>
-                : <>
                   <div>
                     <label>Password</label>
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -166,8 +161,8 @@ export default function UserForm() {
                       </button>
                     </div>
                   </div>
-
-                </>}
+                </>
+              )}
 
               <div>
                 <label>User Type</label>
@@ -181,6 +176,7 @@ export default function UserForm() {
                   <option value="system">System</option>
                 </select>
               </div>
+              
               {user.user_type === "system" && (
                 <div>
                   <label>Role</label>
@@ -198,6 +194,7 @@ export default function UserForm() {
                   </select>
                 </div>
               )}
+              
               <button className="btn btn-primary m-2">Save</button>
             </div>
           </form>

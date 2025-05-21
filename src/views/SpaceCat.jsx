@@ -2,12 +2,33 @@ import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../context/ContextProvider.jsx";
+//step-1
+import { getUserPermissions } from "./getUserPermissions.js";
+import { formatPermissions } from "./formatPermissions.js";
 
 export default function SpaceCat() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const { setNotification } = useStateContext();
     const navigate = useNavigate(); // Used for navigation
+
+    const [permissions, setPermissions] = useState({}); // step 2
+    // step-3
+    useEffect(() => {
+        const loadPermissions = async () => {
+            const raw = await getUserPermissions();
+            // console.log(raw)
+            const formatted = formatPermissions(raw);
+            setPermissions(formatted);
+        };
+
+        loadPermissions();
+    }, []);
+
+    //step-4
+    const can = (module, action) => {
+        return permissions[module]?.has(action);
+    };
 
     useEffect(() => {
         getUsers();
@@ -63,9 +84,12 @@ export default function SpaceCat() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <h1>Space Category</h1>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-                    <button  style={{ marginRight: "10px" }} className="btn btn-sm  btn-warning" onClick={exportToCSV}>Export</button>
-                    <Link style={{ marginRight: "10px" }} className=" btn btn-sm  btn-primary" to="/space-category/new">Add New</Link>
+                {can('manage_space_category', 'list') && (
+                    <button style={{ marginRight: "10px" }} className="btn btn-sm  btn-warning" onClick={exportToCSV}>Export</button>
+                )}
+                    {can('manage_space_category', 'add') && (
+                        <Link style={{ marginRight: "10px" }} className=" btn btn-sm  btn-primary" to="/space-category/new">Add New</Link>
+                    )}
                 </div>
             </div>
 
@@ -76,7 +100,7 @@ export default function SpaceCat() {
                             <th>Category ID</th>
                             <th>Name</th>
                             <th>Rate</th>
-                            <th style={{textAlign:"center"}}>Actions</th>
+                            <th style={{ textAlign: "center" }}>Actions</th>
                         </tr>
                     </thead>
                     {loading && (
@@ -95,10 +119,13 @@ export default function SpaceCat() {
                                         <td>{u.name}</td>
                                         <td>{u.rate}</td>
                                         <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                                            {can('manage_space_category', 'edit') && (
+                                                <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => navigate(`/space-category/edit/${u.id}`)}>Edit</button>
+                                            )}
 
-                                            <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => navigate(`/space-category/edit/${u.id}`)}>Edit</button>
-
-                                            <button style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>Delete</button>
+                                            {can('manage_space_category', 'delete') && (
+                                                <button style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>Delete</button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

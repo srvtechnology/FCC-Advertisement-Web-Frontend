@@ -4,7 +4,7 @@ import axiosClient from "../axios-client.js";
 import { useEffect, useState } from "react";
 import { LogOut } from "lucide-react";
 import { LayoutDashboard, Users, Building2, Map, CalendarCheck, CreditCard, ShieldCheck, KeyRound } from "lucide-react";
-
+import { getUserPermissions } from "../views/getUserPermissions.js";
 
 export default function DefaultLayout() {
     const { user, token, setUser, setToken, notification } = useStateContext();
@@ -12,6 +12,17 @@ export default function DefaultLayout() {
     const [userRolesPermission, setUserRolesPermission] = useState([]);
     const [loading, setLoading] = useState(true);
     const location = useLocation(); // Get the current location
+
+    const [permissions, setPermissions] = useState({}); // step 2
+    // step-3
+    useEffect(() => {
+        const loadPermissions = async () => {
+            const raw = await getUserPermissions();
+            // console.log(raw)
+            setPermissions(raw);
+        };
+        loadPermissions();
+    }, []);
 
     useEffect(() => {
         if (!token) {
@@ -23,7 +34,8 @@ export default function DefaultLayout() {
             .then(({ data }) => {
                 console.log(data);
                 setUser(prevUser => prevUser?.id === data.id ? prevUser : data);
-                setUserRoles(prevRoles => JSON.stringify(prevRoles) === JSON.stringify(data.roles?.map(role => role.name)) ? prevRoles : data.roles?.map(role => role.name) || []);
+                setUserRoles((data.role.name || '').toLowerCase());
+                // setUserRoles(prevRoles => JSON.stringify(prevRoles) === JSON.stringify(data.roles?.map(role => role.name)) ? prevRoles : data.roles?.map(role => role.name) || []);
                 setUserRolesPermission(prevPermissions => JSON.stringify(prevPermissions) === JSON.stringify(data.roles?.flatMap(role => role.permissions?.map(permission => permission.name))) ? prevPermissions : data.roles?.flatMap(role => role.permissions?.map(permission => permission.name)) || []);
             })
             .catch((error) => {
@@ -51,7 +63,10 @@ export default function DefaultLayout() {
     };
     // console.log(location.pathname.split('/')[1])
 
+
+
     const renderSideNav = () => {
+        // console.log(userRoles.length, userRoles)
         if (!userRoles.length) return null;
 
         let links = [];
@@ -71,62 +86,47 @@ export default function DefaultLayout() {
             textDecoration: "none",
         });
 
-        const navItemHoverStyle = {
-            backgroundColor: "#6d14c5",
-            color: "#ffffff",
+        // Helper function to check if user has any permission for a module
+        const hasModulePermission = (moduleName) => {
+            return Array.isArray(permissions) &&
+                permissions.some(perm => perm.module === moduleName);
         };
 
-        if (userRoles.includes("admin")) {
+        if (userRoles==="admin" || userRoles==="super admin") {
+            // Admin sees all links by default, but we can make it more precise
             links.push(
                 <Link key="dashboard" to="/dashboard" style={navItemStyle("dashboard")} className="sidebar-link">
                     <LayoutDashboard size={20} />
                     <span>Dashboard</span>
                 </Link>
             );
-            links.push(
-                <Link key="users" to="/users" style={navItemStyle("users")} className="sidebar-link">
-                    <Users size={20} />
-                    <span>Users</span>
-                </Link>
-            );
-            links.push(
-                <Link key="space-category" to="/space-category" style={navItemStyle("space-category")} className="sidebar-link">
-                    <Building2 size={20} />
-                    <span>Space Category</span>
-                </Link>
-            );
-            links.push(
-                <Link key="space" to="/space" style={navItemStyle("space")} className="sidebar-link">
-                    <Map size={20} />
-                    <span>Space List</span>
-                </Link>
-            );
-            links.push(
-                <Link key="bookings" to="/bookings" style={navItemStyle("bookings")} className="sidebar-link">
-                    <CalendarCheck size={20} />
-                    <span>Bookings</span>
-                </Link>
-            );
-            links.push(
-                <Link key="payments" to="/payments" style={navItemStyle("payments")} className="sidebar-link">
-                    <CreditCard size={20} />
-                    <span>Payments</span>
-                </Link>
-            );
-            links.push(
-                <Link key="roles" to="/roles" style={navItemStyle("roles")} className="sidebar-link">
-                    <ShieldCheck size={20} />
-                    <span>Roles & Permissions</span>
-                </Link>
-            );
-            links.push(
-                <Link key="permissions" to="/permissions" style={navItemStyle("permissions")} className="sidebar-link">
-                    <KeyRound size={20} />
-                    <span>Assign Permissions</span>
-                </Link>
-            );
-        } else {
-            if (userRolesPermission.includes("manage spaces")) {
+
+            // Only show Users if has any manage_user permissions
+            if (hasModulePermission("manage_user")) {
+                links.push(
+                    <Link key="users" to="/users" style={navItemStyle("users")} className="sidebar-link">
+                        <Users size={20} />
+                        <span>Users</span>
+                    </Link>
+                );
+            }
+
+            // Only show Space related items if has any manage_space_category permissions
+            if (hasModulePermission("manage_space_category")) {
+                links.push(
+                    <Link key="space-category" to="/space-category" style={navItemStyle("space-category")} className="sidebar-link">
+                        <Building2 size={20} />
+                        <span>Space Category</span>
+                    </Link>
+                );
+
+
+            }
+
+
+            // Only show Space related items if has any manage_spaces permissions
+            if (hasModulePermission("manage_spaces")) {
+
                 links.push(
                     <Link key="space" to="/space" style={navItemStyle("space")} className="sidebar-link">
                         <Map size={20} />
@@ -135,7 +135,8 @@ export default function DefaultLayout() {
                 );
             }
 
-            if (userRolesPermission.includes("manage bookings")) {
+            // Only show Bookings if has any manage_booking permissions
+            if (hasModulePermission("manage_booking")) {
                 links.push(
                     <Link key="bookings" to="/bookings" style={navItemStyle("bookings")} className="sidebar-link">
                         <CalendarCheck size={20} />
@@ -144,7 +145,70 @@ export default function DefaultLayout() {
                 );
             }
 
-            if (userRolesPermission.includes("manage payments") && !links.find(link => link.key === "payments")) {
+            // Only show Payments if has any manage_payment permissions
+            if (hasModulePermission("manage_payment")) {
+                links.push(
+                    <Link key="payments" to="/payments" style={navItemStyle("payments")} className="sidebar-link">
+                        <CreditCard size={20} />
+                        <span>Payments</span>
+                    </Link>
+                );
+            }
+
+            // Admin-specific items (always visible)
+            links.push(
+                <Link key="roles" to="/roles" style={navItemStyle("roles")} className="sidebar-link">
+                    <ShieldCheck size={20} />
+                    <span>Roles & Permissions</span>
+                </Link>
+            );
+
+            links.push(
+                <Link key="logs" to="/logs" style={navItemStyle("logs")} className="sidebar-link">
+                    <KeyRound size={20} />
+                    <span>Audit Logs</span>
+                </Link>
+            );
+        } else {
+            // Regular users see only what they have permissions for
+
+            if (hasModulePermission("manage_user")) {
+                links.push(
+                    <Link key="users" to="/users" style={navItemStyle("users")} className="sidebar-link">
+                        <Users size={20} />
+                        <span>Users</span>
+                    </Link>
+                );
+            }
+
+
+            if (hasModulePermission("manage_space_category")) {
+                links.push(
+                    <Link key="space-category" to="/space-category" style={navItemStyle("space-category")} className="sidebar-link">
+                        <Building2 size={20} />
+                        <span>Space Category</span>
+                    </Link>
+                );
+            }
+            if (hasModulePermission("manage_spaces")) {
+                links.push(
+                    <Link key="space" to="/space" style={navItemStyle("space")} className="sidebar-link">
+                        <Map size={20} />
+                        <span>Space List</span>
+                    </Link>
+                );
+            }
+
+            if (hasModulePermission("manage_booking")) {
+                links.push(
+                    <Link key="bookings" to="/bookings" style={navItemStyle("bookings")} className="sidebar-link">
+                        <CalendarCheck size={20} />
+                        <span>Bookings</span>
+                    </Link>
+                );
+            }
+
+            if (hasModulePermission("manage_payment")) {
                 links.push(
                     <Link key="payments" to="/payments" style={navItemStyle("payments")} className="sidebar-link">
                         <CreditCard size={20} />
@@ -156,7 +220,6 @@ export default function DefaultLayout() {
 
         return links.length > 0 ? <div className="sidebar-nav">{links}</div> : null;
     };
-
     // Add CSS for hover effects
     const style = document.createElement('style');
     style.innerHTML = `
@@ -182,6 +245,7 @@ export default function DefaultLayout() {
                 {/* Logo */}
                 <div className="text-center mb-4">
                     <img
+                       style={{width:"190px"}}
                         src={`${import.meta.env.VITE_API_BASE_URL}/storage/image4.png`}
                         alt="Logo"
                         className="w-24 h-auto mx-auto"
@@ -199,8 +263,8 @@ export default function DefaultLayout() {
 
             <div className="content">
                 <header className="flex justify-between items-center p-4 bg-gray-300">
-                    <div><b style={{fontSize:"20px"}}> Freetown City Council - Advertisement 
-                    Management System </b></div>
+                    <div><b style={{ fontSize: "20px" }}> Freetown City Council - Advertisement
+                        Management System </b></div>
                     <div style={{ justifyContent: "center", display: "flex" }}>
                         <span style={{ color: "#5b08a7", marginTop: "10px", fontWeight: "bold" }}>
                             {user?.name} &nbsp; &nbsp;
@@ -210,7 +274,7 @@ export default function DefaultLayout() {
                             onClick={onLogout}
                             className="btn-logout"
                             style={{
-                                background:"rgb(206 184 225)",
+                                background: "rgb(206 184 225)",
                                 cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center",
