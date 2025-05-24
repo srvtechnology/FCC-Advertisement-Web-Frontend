@@ -19,7 +19,7 @@ export default function SpaceBook() {
     customer_email: "",
     mobile: "",
     address: "",
-    description_of_ad:"",
+    description_of_ad: "",
   });
 
   useEffect(() => {
@@ -80,10 +80,33 @@ export default function SpaceBook() {
       }));
     }
   }, [space]);  // Runs when `space` is updated
-  
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(space.bookings);
+
+    // Check if dates conflict
+    const formStart = new Date(formData.start_date);
+    const formEnd = new Date(formData.end_date);
+
+    const hasConflict = space.bookings.some((booking) => {
+      const bookingStart = new Date(booking.start_date);
+      const bookingEnd = new Date(booking.end_date);
+
+      return (
+        (formStart >= bookingStart && formStart <= bookingEnd) ||
+        (formEnd >= bookingStart && formEnd <= bookingEnd) ||
+        (formStart <= bookingStart && formEnd >= bookingEnd)
+      );
+    });
+
+    if (hasConflict) {
+      alert("Selected dates are already booked, chosee different slots!");
+      return false; // Stop form submission
+    }
+
+    // If no conflict, proceed with API call
     axiosClient
       .post("/bookings", formData)
       .then(() => {

@@ -15,7 +15,7 @@ export default function BookingView() {
         .get(`/bookings/${id}`)
         .then(({ data }) => {
           console.log(data);
-          
+
           setSpace(data);
         })
         .catch(() => {
@@ -36,7 +36,7 @@ export default function BookingView() {
         Back to Booking List
       </button>
 
-      <h1 className="text-center mb-4">Pament Details of Space ID {space.space_id}</h1>
+      <h1 className="text-center mb-4">Payment Details of Space ID FCC/SPC/{space.space_id}</h1>
 
       <div className="row">
         {/* Booking Information Card */}
@@ -44,7 +44,11 @@ export default function BookingView() {
           <div className="card">
             <div className="card-header bg-light text-black">Booking Information</div>
             <div className="card-body">
-            <p><strong>Amount:</strong> {space.amount}</p>
+              <p><strong>Amount:</strong>
+                {` NLe ${(space.space?.rate * space.space?.area_advertise * parseInt(space.space?.other_advertisement_sides_no ?? 1))
+                  .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
+
+              </p>
               <p><strong>Address:</strong> {space.address}</p>
               <p><strong>Customer Email:</strong> {space.customer_email}</p>
               <p><strong>Customer Name:</strong> {space.customer_name}</p>
@@ -53,12 +57,14 @@ export default function BookingView() {
               <p><strong>Customer Telephone:</strong> {space.mobile}</p>
               <p><strong>Period:</strong> {space.period}</p>
               <p><strong>Status:</strong> {space.status}</p>
+              <p><strong>Booking Created By User Name:</strong>  {space?.created_by_user?.name}</p>
+              <p><strong>Booking Created By User Id:</strong>  {space?.created_by_user?.id}</p>
             </div>
           </div>
         </div>
 
-         {/* Basic Information Card */}
-         <div className="col-md-6 mb-4">
+        {/* Basic Information Card */}
+        <div className="col-md-6 mb-4">
           <div className="card">
             <div className="card-header bg-primary text-white">Space Basic Information</div>
             <div className="card-body">
@@ -78,7 +84,7 @@ export default function BookingView() {
           <div className="card">
             <div className="card-header bg-warning text-white">Advertisement Identification</div>
             <div className="card-body">
-            <p><strong>Space Category:</strong> {space.space.category.rate}</p>
+              <p><strong>Space Category:</strong> {space.space.category.rate}</p>
               <p><strong>Location:</strong> {space.space.location}</p>
               <p><strong>Street/Road Number:</strong> {space.space.stree_rd_no}</p>
               <p><strong>Section of Road:</strong> {space.space.section_of_rd}</p>
@@ -103,7 +109,7 @@ export default function BookingView() {
               <p><strong>No. of Sides:</strong> {space.space.no_advertisement_sides}</p>
               <p><strong>Clearance Height:</strong> {space.space.clearance_height_advertise}</p>
               <p><strong>Illumination:</strong> {space.space.illuminate_nonilluminate}</p>
-              <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p>
+              {/* <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p> */}
             </div>
           </div>
         </div>
@@ -118,6 +124,44 @@ export default function BookingView() {
               <p><strong>Street Address:</strong> {space.space.landlord_street_address}</p>
               <p><strong>Telephone:</strong> {space.space.landlord_telephone}</p>
               <p><strong>Email:</strong> {space.space.landlord_email}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-header bg-dark text-white">space Documents</div>
+            <div className="card-body text-center">
+              <div className="row">
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_1}`}
+                    alt="Document 1"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Front view</strong></p>
+                </div>
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_2}`}
+                    alt="Document 2"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Back view</strong></p>
+                </div>
+
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.space.image_3}`}
+                    alt="Document 2"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Whole view</strong></p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

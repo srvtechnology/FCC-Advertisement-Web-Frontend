@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import axiosClient from "../axios-client.js";
 import { createRef, useState } from "react";
-import { useStateContext } from "../context/ContextProvider.jsx";
+import { useStateContext } from "../context/ContextProvider";
 import { useNavigate } from "react-router-dom";
 
-export default function Login() {
-  const navigate = useNavigate();
-  const emailRef = createRef();
+export default function OtpSubmit() {
+  const navigate=useNavigate();
+  const { user } = useStateContext();
+  console.log(user);
+  const otpref = createRef();
   const passwordRef = createRef();
   const { setUser, setToken } = useStateContext();
   const [message, setMessage] = useState(null);
@@ -20,15 +22,15 @@ export default function Login() {
     ev.preventDefault();
 
     const payload = {
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
+      otp: otpref.current.value,
+      email:user?.email,
     };
     axiosClient
-      .post("/login", payload)
+      .post("/verify-otp", payload)
       .then(({ data }) => {
         setUser(data.user);
-        // setToken(data.token);
-        navigate("/otp")
+        setToken(data.token);
+        // navigate("/otp")
       })
       .catch((err) => {
         const response = err.response;
@@ -57,48 +59,27 @@ export default function Login() {
           </h2>
         </div>
 
-        <h2 style={{ fontWeight: 'bold', }} className="text-left mb-4">Login</h2>
-
+        <h2  style={{ fontWeight: 'bold', }} className="text-left mb-4">Otp submit</h2>
 
         {message && <div className="alert alert-danger">{message}</div>}
 
         <form onSubmit={onSubmit}>
-          {/* Email */}
+          {/* otp */}
           <div className="mb-3">
-            <label className="form-label">Email</label>
+            <label className="form-label">Otp</label>
             <input
-              ref={emailRef}
-              type="email"
+              ref={otpref}
+              type="number"
               className="form-control"
-              placeholder="Enter your email"
+              placeholder="Enter your otp"
               required
             />
           </div>
 
-          {/* Password */}
-          <div className="mb-3 position-relative">
-            <label className="form-label">Password</label>
-            <div className="input-group">
-              <input
-                ref={passwordRef}
-                type={showPassword ? "text" : "password"}
-                className="form-control"
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-
+    
           {/* Login Button */}
           <button type="submit" className="btn btn-primary w-100">
-            Login
+            Submit
           </button>
         </form>
       </div>

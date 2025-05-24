@@ -51,6 +51,8 @@ export default function SpaceEntryView() {
               <p><strong>Contact Person:</strong> {space.name_of_contact_person}</p>
               <p><strong>Telephone:</strong> {space.telephone}</p>
               <p><strong>Email:</strong> {space.email}</p>
+              <p><strong>Space Created By User Name:</strong> {space?.created_by_user?.name}</p>
+              <p><strong>Space Created By User Id:</strong> {space?.created_by_user?.id}</p>
             </div>
           </div>
         </div>
@@ -85,7 +87,7 @@ export default function SpaceEntryView() {
               <p><strong>No. of Sides:</strong> {space.no_advertisement_sides}</p>
               <p><strong>Clearance Height:</strong> {space.clearance_height_advertise}</p>
               <p><strong>Illumination:</strong> {space.illuminate_nonilluminate}</p>
-              <p><strong>Certified Georgia Licensed:</strong> {space.certified_georgia_licensed ? "Yes" : "No"}</p>
+              {/* <p><strong>Certified Georgia Licensed:</strong> {space.certified_georgia_licensed ? "Yes" : "No"}</p> */}
             </div>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function SpaceEntryView() {
               <div className="row">
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_1}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_1}`}
                     alt="Document 1"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}
@@ -120,7 +122,7 @@ export default function SpaceEntryView() {
                 </div>
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_2}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_2}`}
                     alt="Document 2"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}
@@ -130,7 +132,7 @@ export default function SpaceEntryView() {
 
                 <div className="col-md-6">
                   <img
-                    src={`https://fccapi.srvtechservices.com/storage/${space.image_3}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.image_3}`}
                     alt="Document 2"
                     className="img-fluid rounded border"
                     style={{ maxHeight: "200px", objectFit: "cover" }}

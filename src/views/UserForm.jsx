@@ -19,6 +19,8 @@ export default function UserForm() {
   const [errors, setErrors] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setNotification } = useStateContext();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     fetchRoles();
@@ -38,16 +40,31 @@ export default function UserForm() {
 
   const fetchRoles = () => {
     axiosClient
-      .get("/roles")
-      .then(({ data }) => setRoles(data.roles)) // Access roles from data object
+      .get("/roles-new")
+      .then(({ data }) => {
+        const filteredRoles = data.data.filter(role => role.name.toLowerCase() !== 'super admin');
+        setRoles(filteredRoles);
+    })
       .catch(console.error);
   };
 
   const onSubmit = (ev) => {
     ev.preventDefault();
-    if (user.id) {
+    
+    // Prepare the user data to send
+    const userData = {...user};
+    
+    // For agents, set default password if not provided
+    if (userData.user_type === 'agent') {
+      if (!userData.password) {
+        userData.password = 'Demo@123@';
+        userData.password_confirmation = 'Demo@123@';
+      }
+    }
+
+    if (userData.id) {
       axiosClient
-        .put(`/users/${user.id}`, user)
+        .put(`/users/${userData.id}`, userData)
         .then(() => {
           setNotification("User was successfully updated");
           navigate("/users");
@@ -60,7 +77,7 @@ export default function UserForm() {
         });
     } else {
       axiosClient
-        .post("/users", user)
+        .post("/users", userData)
         .then(() => {
           setNotification("User was successfully created");
           navigate("/users");
@@ -106,22 +123,47 @@ export default function UserForm() {
                   placeholder="Email"
                 />
               </div>
-              <div>
-                <label>Password </label>
-                <input
-                  type="password"
-                  onChange={(ev) => setUser({ ...user, password: ev.target.value })}
-                  placeholder="Password"
-                />
-              </div>
-              <div>
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  onChange={(ev) => setUser({ ...user, password_confirmation: ev.target.value })}
-                  placeholder="Password Confirmation"
-                />
-              </div>
+              
+              {user.user_type !== "agent" && (
+                <>
+                  <div>
+                    <label>Password</label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        onChange={(ev) => setUser({ ...user, password: ev.target.value })}
+                        placeholder="Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ marginLeft: "10px", cursor: "pointer" }}
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label>Confirm Password</label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        onChange={(ev) => setUser({ ...user, password_confirmation: ev.target.value })}
+                        placeholder="Password Confirmation"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={{ marginLeft: "10px", cursor: "pointer" }}
+                      >
+                        {showConfirmPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div>
                 <label>User Type</label>
                 <select
@@ -129,10 +171,12 @@ export default function UserForm() {
                   value={user.user_type}
                   onChange={(ev) => setUser({ ...user, user_type: ev.target.value })}
                 >
+                  <option value="">Select</option>
                   <option value="agent">Agent</option>
                   <option value="system">System</option>
                 </select>
               </div>
+              
               {user.user_type === "system" && (
                 <div>
                   <label>Role</label>
@@ -150,6 +194,7 @@ export default function UserForm() {
                   </select>
                 </div>
               )}
+              
               <button className="btn btn-primary m-2">Save</button>
             </div>
           </form>

@@ -1,0 +1,23 @@
+html, body {
+    overflow-x: hidden !important; /* Prevents entire page from scrolling horizontally */
+  }
+  
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .card {
+    overflow: hidden; /* Prevents content overflow */
+  }
+  .table-container {
+    width: 100%;
+    overflow-x: auto; /* Enables horizontal scrolling */
+    white-space: nowrap;
+    max-height: 500px; /* Optional: Limits height if needed */
+  }
+  
+  .table-container table {
+    min-width: 1200px; /* Ensures scrollbar appears when content is wider */
+  }
+    

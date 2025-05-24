@@ -15,7 +15,7 @@ export default function PaymentView() {
         .get(`/payment/${id}`)
         .then(({ data }) => {
           console.log(data);
-          
+
           setSpace(data);
         })
         .catch(() => {
@@ -36,7 +36,7 @@ export default function PaymentView() {
         Back to Payment List
       </button>
 
-      <h1 className="text-center mb-4">Payment Detail: Space ID {space.space_id}</h1>
+      <h1 className="text-center mb-4">Payment Detail: Space ID FCC/SPC/{space.space_id}</h1>
 
       <div className="row">
         {/* Booking Information Card */}
@@ -44,7 +44,15 @@ export default function PaymentView() {
           <div className="card">
             <div className="card-header bg-light text-black">Booking Information</div>
             <div className="card-body">
-            <p><strong>Amount:</strong> NLe {space.amount} </p>
+              <p>
+                <strong>Amount:</strong> NLe{" "}
+                {Number(space.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+              </p>
+
+
+
+
+
               <p><strong>Address:</strong> {space.booking.address}</p>
               <p><strong>Customer Email:</strong> {space.booking.customer_email}</p>
               <p><strong>Customer Name:</strong> {space.booking.customer_name}</p>
@@ -52,13 +60,31 @@ export default function PaymentView() {
               <p><strong>End Date:</strong> {space.booking.end_date}</p>
               <p><strong>Customer Telephone:</strong> {space.booking.mobile}</p>
               <p><strong>Period:</strong> {space.booking.period}</p>
+              <p><strong>Payee Name:</strong> {space.payee_name}</p>
+              <p><strong>Payee Adress:</strong> {space.payee_address}</p>
+              <p><strong>Payment Date:</strong> {space.payment_date}</p>
+              <p><strong>Payment Mode:</strong> {space.payment_mode}</p>
+              {/* <p><strong>Period:</strong> {space.booking.period}</p> */}
               <p><strong>Status:</strong> {space.booking.status}</p>
+              <p><strong>Payment Created By User Name:</strong>  {space?.created_by_user?.name}</p>
+              <p><strong>Payment Created By User Id:</strong>  {space?.created_by_user?.id}</p>
+
+              <div className="col-md-6">
+              <p className="mt-2"><strong>Payment Document</strong></p>
+                <img
+                  src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.payment_slip}`}
+                  alt="Document 2"
+                  className="img-fluid rounded border"
+                  style={{ maxHeight: "200px", objectFit: "cover" }}
+                />
+               
+              </div>
             </div>
           </div>
         </div>
 
-         {/* Basic Information Card */}
-         <div className="col-md-6 mb-4">
+        {/* Basic Information Card */}
+        <div className="col-md-6 mb-4">
           <div className="card">
             <div className="card-header bg-primary text-white">Space Basic Information</div>
             <div className="card-body">
@@ -78,7 +104,7 @@ export default function PaymentView() {
           <div className="card">
             <div className="card-header bg-warning text-white">Advertisement Identification</div>
             <div className="card-body">
-            <p><strong>Space Category:</strong> {space.space.category.rate}</p>
+              <p><strong>Space Category:</strong> {space.space.category.rate}</p>
               <p><strong>Location:</strong> {space.space.location}</p>
               <p><strong>Street/Road Number:</strong> {space.space.stree_rd_no}</p>
               <p><strong>Section of Road:</strong> {space.space.section_of_rd}</p>
@@ -103,7 +129,7 @@ export default function PaymentView() {
               <p><strong>No. of Sides:</strong> {space.space.no_advertisement_sides}</p>
               <p><strong>Clearance Height:</strong> {space.space.clearance_height_advertise}</p>
               <p><strong>Illumination:</strong> {space.space.illuminate_nonilluminate}</p>
-              <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p>
+              {/* <p><strong>Certified Georgia Licensed:</strong> {space.space.certified_georgia_licensed ? "Yes" : "No"}</p> */}
             </div>
           </div>
         </div>
@@ -118,6 +144,28 @@ export default function PaymentView() {
               <p><strong>Street Address:</strong> {space.space.landlord_street_address}</p>
               <p><strong>Telephone:</strong> {space.space.landlord_telephone}</p>
               <p><strong>Email:</strong> {space.space.landlord_email}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-header bg-dark text-white">payment Documents</div>
+            <div className="card-body text-center">
+              <div className="row">
+                <div className="col-md-6">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${space.payment_slip}`}
+                    alt="Document 1"
+                    className="img-fluid rounded border"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                  <p className="mt-2"><strong>Front view</strong></p>
+                </div>
+                
+
+              
+              </div>
             </div>
           </div>
         </div>

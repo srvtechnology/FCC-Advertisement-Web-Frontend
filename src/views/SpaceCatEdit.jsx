@@ -78,8 +78,8 @@ const SpaceCatEdit = () => {
                     {/* Buttons */}
 
 
-                    <div style={{ display: "flex", gap: "10px", justifyContent: "center", float: "left" }}>
-                        <button type="submit" className="btn btn-warning" >Edit</button>
+                    <div style={{ marginTop:"10px", display: "flex", gap: "10px", justifyContent: "center", float: "left" }}>
+                        <button type="submit" className="btn btn-warning" >Update </button>
                         <button className="btn btn-danger" onClick={() => navigate("/space-category")}>Cancel</button>
                     </div>
 

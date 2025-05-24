@@ -252,3 +252,5 @@ table > tbody > tr > td {
         transform: translateY(0);
     }
 }
+
+.table-responsive{max-height:500px;overflow-x:auto;width:calc(100vw - 330px);}.table-responsive th{white-space:nowrap;}

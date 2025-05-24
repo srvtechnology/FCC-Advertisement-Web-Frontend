@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axiosClient from "../axios-client.js";
 import { Link } from "react-router-dom";
 import { useStateContext } from "../context/ContextProvider.jsx";
+//step-1
+import { getUserPermissions } from "./getUserPermissions.js";
+import { formatPermissions } from "./formatPermissions.js";
 
 export default function Spaces() {
   const [spaces, setSpaces] = useState([]);
@@ -19,6 +22,24 @@ export default function Spaces() {
   const [toDate, setToDate] = useState("");
   const [agents, setAgents] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
+
+  const [permissions, setPermissions] = useState({}); // step 2
+  // step-3
+  useEffect(() => {
+    const loadPermissions = async () => {
+      const raw = await getUserPermissions();
+      // console.log(raw)
+      const formatted = formatPermissions(raw);
+      setPermissions(formatted);
+    };
+
+    loadPermissions();
+  }, []);
+
+  //step-4
+  const can = (module, action) => {
+    return permissions[module]?.has(action);
+  };
 
   useEffect(() => {
     fetchAgents();
@@ -87,7 +108,7 @@ export default function Spaces() {
   };
 
   const exportToCSV = () => {
-    const BASE_URL = "https://fccapi.srvtechservices.com/storage/";
+    const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/storage/`;
     if (!spaces.length) return alert("No data to export");
 
     // Convert data to CSV-compatible format
@@ -97,6 +118,8 @@ export default function Spaces() {
       Name: `"${space.name_of_person_collection_data ?? "N/A"}"`,
       "Agent Name": `"${space.name_of_advertise_agent_company_or_person ?? "N/A"}"`,
       "Contact Person": `"${space.name_of_contact_person ?? "N/A"}"`,
+      "Created By User Name": `"${space.created_by_user?.name ?? "N/A"}"`,
+      "Created By User Id": `"${space.created_by_user?.id ?? "N/A"}"`,
       Telephone: `"${space.telephone ?? "N/A"}"`,
       Email: `"${space.email ?? "N/A"}"`,
       Location: `"${space.location ?? "N/A"}"`,
@@ -148,79 +171,83 @@ export default function Spaces() {
     <div>
       <div>
         {/* Filters Section */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="mb-0">Spaces</h1>
-          <div className="d-flex gap-2 align-items-center">
-            {/* Search Input */}
-            <div className="d-flex flex-column">
-              <label className="small text-muted">Name</label>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="form-control form-control-sm"
-                style={{ width: "200px" }}
-              />
+        {can('manage_spaces', 'list') && (
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h1 className="mb-0">Spaces</h1>
+            <div className="d-flex gap-2 align-items-center">
+              {/* Search Input */}
+              <div className="d-flex flex-column">
+                <label className="small text-muted">Name</label>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="form-control form-control-sm"
+                  style={{ width: "200px" }}
+                />
+              </div>
+
+              {/* Date Range */}
+              <div className="d-flex flex-column">
+                <label className="small text-muted">From Date</label>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="form-control form-control-sm"
+                />
+              </div>
+
+              <div className="d-flex flex-column">
+                <label className="small text-muted">To Date</label>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="form-control form-control-sm"
+                />
+              </div>
+
+              <div className="d-flex flex-column">
+                <label className="small text-muted">Agent</label>
+                <select
+                  value={selectedAgent}
+                  onChange={(e) => setSelectedAgent(e.target.value)}
+                  className="form-control form-control-sm"
+                >
+                  <option value="">Select an option</option>
+                  {agents?.map((option, index) => (
+                    <option key={index} value={option?.name}>
+                      {option?.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Search Button */}
+              <button style={{ marginTop: "20px" }} className="btn btn-sm btn-success px-3" onClick={handleSearch}>
+                Search
+              </button>
+
+              {/* Export Button */}
+              <button style={{ marginTop: "20px" }} className="btn btn-sm btn-warning px-3" onClick={exportToCSV}>
+                Export
+              </button>
+
+              {/* Add New Button */}
+              {can('manage_spaces', 'add') && (
+                <Link style={{ marginTop: "20px" }} className="btn btn-sm btn-primary px-3" to="/space/new">
+                  Add New
+                </Link>
+              )}
             </div>
-
-            {/* Date Range */}
-            <div className="d-flex flex-column">
-              <label className="small text-muted">From Date</label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="form-control form-control-sm"
-              />
-            </div>
-
-            <div className="d-flex flex-column">
-              <label className="small text-muted">To Date</label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="form-control form-control-sm"
-              />
-            </div>
-
-            <div className="d-flex flex-column">
-              <label className="small text-muted">Agent</label>
-              <select
-                value={selectedAgent}
-                onChange={(e) => setSelectedAgent(e.target.value)}
-                className="form-control form-control-sm"
-              >
-                <option value="">Select an option</option>
-                {agents?.map((option, index) => (
-                  <option key={index} value={option?.name}>
-                    {option?.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Search Button */}
-            <button style={{ marginTop: "20px" }} className="btn btn-sm btn-success px-3" onClick={handleSearch}>
-              Search
-            </button>
-
-            {/* Export Button */}
-            <button style={{ marginTop: "20px" }} className="btn btn-sm btn-warning px-3" onClick={exportToCSV}>
-              Export
-            </button>
-
-            {/* Add New Button */}
-            <Link style={{ marginTop: "20px" }} className="btn btn-sm btn-primary px-3" to="/space/new">
-              Add New
-            </Link>
           </div>
-        </div>
+        )}
       </div>
       {/* Table */}
-      <div className="card animated fadeInDown">
-        <table className="table table-striped">
+      <div className="card animated fadeInDown table-responsive">
+        <table className="table table-striped" >
           <thead className="table-primary"> {/* Makes header gray */}
             <tr>
               <th>Space ID</th>
@@ -247,32 +274,45 @@ export default function Spaces() {
                   <td>{u.name_of_advertise_agent_company_or_person}</td>
                   <td>
                     <div className="flex flex-wrap items-center gap-2" >
-                      <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" to={`/space/${u.id}`}>
-                        Edit
-                      </Link>
+                      {can('manage_spaces', 'edit') && (
+                        <>
+                          <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" to={`/space/${u.id}`}>
+                            Edit
+                          </Link>
 
-                      {u.bookings[0]?.status === "approved" ? (
-                        <span style={{ marginRight: "26px" }} className="btn btn-sm btn-secondary w-24 text-center">Booked</span>
-                      ) : (
-                        <Link style={{ marginRight: "8px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space-book/${u.id}`}>
-                          Book Now
-                        </Link>
+
+                          {u.bookings[0]?.status === "approved" ? (
+                            <Link style={{ marginRight: "8px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space/book/${u.id}`}>
+                              Book Now
+                            </Link>
+                          ) : (
+                            <Link style={{ marginRight: "8px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space/book/${u.id}`}>
+                              Book Now
+                            </Link>
+                          )}
+                        </>
                       )}
 
-                      <button style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>
-                        Delete
-                      </button>
-
-                      <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space-view/${u.id}`}>
-                        View
-                      </Link>
+                      {can('manage_spaces', 'delete') && (
+                        <button style={{ marginRight: "10px" }} className="btn btn-sm btn-danger w-24 text-center" onClick={() => onDeleteClick(u)}>
+                          Delete
+                        </button>
+                      )}
+                      {can('manage_spaces', 'view') && (
+                        <Link style={{ marginRight: "10px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space/view/${u.id}`}>
+                          View
+                        </Link>
+                      )}
 
                       <button
                         style={{ marginRight: "10px" }}
                         className="btn btn-sm btn-info w-24 text-center"
                         onClick={() => {
                           if (u.gps_cordinate) {
-                            const [lat, long] = u.gps_cordinate.split(",").map((coord) => coord.trim());
+                            const parts = u.gps_cordinate.trim().split(/\s+/);  // Split on one or more spaces
+                            const lat = parts[0];
+                            const long = parts[1];
+                            // console.log(parts, lat, long);
                             window.open(`https://www.google.com/maps?q=${lat},${long}`, "_blank");
                           } else {
                             alert("No GPS coordinates available for this space.");
@@ -286,7 +326,7 @@ export default function Spaces() {
                         <>
                         </>) : (
                         <>
-                          <Link style={{ marginRight: "8px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space-book/${u.id}`}>
+                          <Link style={{ marginRight: "8px" }} className="btn btn-sm btn-success w-24 text-center" to={`/space/book/${u.id}`}>
                             Blank Space
                           </Link>
                         </>
