@@ -12,6 +12,8 @@ const SpaceCatEdit = () => {
     const [spaceCat, setSpaceCat] = useState({
         name: "",
         rate: "",
+        system_agent_rate: "",
+        corporate_agent_rate: ""
     });
 
     const [loading, setLoading] = useState(false);
@@ -66,11 +68,35 @@ const SpaceCatEdit = () => {
 
                     {/* Rate Field */}
                     <div className="form-group">
-                        <label>Rate:</label>
+                        <label>General Agent Rate:</label>
                         <input
                             type="number"
                             value={spaceCat.rate}
                             onChange={(e) => setSpaceCat({ ...spaceCat, rate: e.target.value })}
+                            required
+                        />
+                    </div>
+                   
+                   
+                    {/*System Agent Rate Field */}
+                    <div className="form-group">
+                        <label>System Agent Rate:</label>
+                        <input
+                            type="number"
+                            value={spaceCat.system_agent_rate}
+                            onChange={(e) => setSpaceCat({ ...spaceCat, system_agent_rate: e.target.value })}
+                            required
+                        />
+                    </div>
+                 
+                 
+                    {/*Corporate Agent Rate Field */}
+                    <div className="form-group">
+                        <label>Corporate Agent Rate:</label>
+                        <input
+                            type="number"
+                            value={spaceCat.corporate_agent_rate}
+                            onChange={(e) => setSpaceCat({ ...spaceCat, corporate_agent_rate: e.target.value })}
                             required
                         />
                     </div>

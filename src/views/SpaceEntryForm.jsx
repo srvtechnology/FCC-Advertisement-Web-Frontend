@@ -13,6 +13,7 @@ export default function SpaceEntryForm() {
   const [space, setSpace] = useState({
     id: null,
     space_cat_id: "",
+    agent_rate_name: "",
     data_collection_date: '',
     name_of_person_collection_data: '',
     name_of_advertise_agent_company_or_person: '',
@@ -277,6 +278,26 @@ export default function SpaceEntryForm() {
                         ))}
                       </select>
                     )}
+                  </div>
+
+                  <div>
+                     <label className="form-label">Select Agent Rate</label>
+                     <select
+                        className="form-select"
+                        value={space.agent_rate_name || ""}
+                        onChange={(ev) => setSpace({ ...space, agent_rate_name: ev.target.value })}
+                      >
+                        <option value="">Select Agent Rate</option>
+                          <option key="general_agent_rate" value="general_agent_rate">
+                            General Agent Rate
+                          </option>
+                          <option key="system_agent_rate" value="system_agent_rate">
+                            System Agent Rate
+                          </option>
+                          <option key="corporate_agent_rate" value="corporate_agent_rate">
+                            Corporate Agent Rate
+                          </option>
+                      </select>
                   </div>
 
                   <div>

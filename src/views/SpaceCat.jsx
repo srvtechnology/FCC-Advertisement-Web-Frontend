@@ -99,7 +99,9 @@ export default function SpaceCat() {
                         <tr>
                             <th>Category ID</th>
                             <th>Name</th>
-                            <th>Rate</th>
+                            <th>General Agent Rate</th>
+                            <th>System Agent Rate</th>
+                            <th>Corporate Agent Rate</th>
                             <th style={{ textAlign: "center" }}>Actions</th>
                         </tr>
                     </thead>
@@ -118,6 +120,8 @@ export default function SpaceCat() {
                                         <td> FCC/SP/{u.id}</td>
                                         <td>{u.name}</td>
                                         <td>{u.rate}</td>
+                                        <td>{u.system_agent_rate}</td>
+                                        <td>{u.corporate_agent_rate}</td>
                                         <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                                             {can('manage_space_category', 'edit') && (
                                                 <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => navigate(`/space-category/edit/${u.id}`)}>Edit</button>
