@@ -53,6 +53,9 @@ export default function SpaceEntryView() {
               <p><strong>Email:</strong> {space.email}</p>
               <p><strong>Space Created By User Name:</strong> {space?.created_by_user?.name}</p>
               <p><strong>Space Created By User Id:</strong> {space?.created_by_user?.id}</p>
+              <p><strong>Business Name:</strong> {space?.business_name}</p>
+              <p><strong>Business Address:</strong> {space?.business_address}</p>
+              <p><strong>Business Contact:</strong> {space?.business_contact}</p>
             </div>
           </div>
         </div>
