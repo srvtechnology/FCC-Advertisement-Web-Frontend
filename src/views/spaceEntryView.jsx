@@ -65,7 +65,7 @@ export default function SpaceEntryView() {
           <div className="card">
             <div className="card-header bg-warning text-white">Advertisement Identification</div>
             <div className="card-body">
-              <p><strong>Space Category:</strong> {space.category.rate}</p>
+              <p><strong>Space Category:</strong> {space.rate} ({space.agent_rate_name})</p>
               <p><strong>Location:</strong> {space.location}</p>
               <p><strong>Street/Road Number:</strong> {space.stree_rd_no}</p>
               <p><strong>Section of Road:</strong> {space.section_of_rd}</p>
