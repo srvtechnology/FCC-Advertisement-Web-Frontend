@@ -99,9 +99,9 @@ export default function SpaceCat() {
                         <tr>
                             <th>Category ID</th>
                             <th>Name</th>
-                            <th>General Agent Rate</th>
-                            <th>System Agent Rate</th>
-                            <th>Corporate Agent Rate</th>
+                            <th>Agents Rate</th>
+                            <th>General and Unclaimed Rate</th>
+                            <th>Other Institutional/Business Rate</th>
                             <th style={{ textAlign: "center" }}>Actions</th>
                         </tr>
                     </thead>

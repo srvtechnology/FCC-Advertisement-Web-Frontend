@@ -68,7 +68,7 @@ const SpaceCatEdit = () => {
 
                     {/* Rate Field */}
                     <div className="form-group">
-                        <label>General Agent Rate:</label>
+                        <label>Agents Rate:</label>
                         <input
                             type="number"
                             value={spaceCat.rate}
@@ -80,7 +80,7 @@ const SpaceCatEdit = () => {
                    
                     {/*System Agent Rate Field */}
                     <div className="form-group">
-                        <label>System Agent Rate:</label>
+                        <label>General and Unclaimed Rate:</label>
                         <input
                             type="number"
                             value={spaceCat.system_agent_rate}
@@ -92,7 +92,7 @@ const SpaceCatEdit = () => {
                  
                     {/*Corporate Agent Rate Field */}
                     <div className="form-group">
-                        <label>Corporate Agent Rate:</label>
+                        <label>Other Institutional/Business Rate:</label>
                         <input
                             type="number"
                             value={spaceCat.corporate_agent_rate}

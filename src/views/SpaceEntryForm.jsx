@@ -289,13 +289,13 @@ export default function SpaceEntryForm() {
                       >
                         <option value="">Select Agent Rate</option>
                           <option key="general_agent_rate" value="general_agent_rate">
-                            General Agent Rate
+                            Agents Rate
                           </option>
                           <option key="system_agent_rate" value="system_agent_rate">
-                            System Agent Rate
+                            General and Unclaimed Rate
                           </option>
                           <option key="corporate_agent_rate" value="corporate_agent_rate">
-                            Corporate Agent Rate
+                            Other Institutional/Business Rate
                           </option>
                       </select>
                   </div>

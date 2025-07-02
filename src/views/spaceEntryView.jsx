@@ -27,6 +27,19 @@ export default function SpaceEntryView() {
     }
   }, [id]);
 
+  // Helper function to get the badge label
+  function getAgentRateBadge(rateName) {
+    if (rateName === "general_agent_rate") {
+      return <span className="badge bg-secondary">Agents Rate</span>;
+    } else if (rateName === "system_agent_rate") {
+      return <span className="badge bg-secondary">General and Unclaimed Rate</span>;
+    } else if (rateName === "corporate_agent_rate") {
+      return <span className="badge bg-secondary">Other Institutional/Business Rate</span>;
+    } else {
+      return <span className="badge bg-secondary">Unknown Rate</span>;
+    }
+  }
+
   if (loading) return <div className="text-center">Loading...</div>;
   if (!space) return <div className="text-center">No data available.</div>;
 
@@ -65,7 +78,9 @@ export default function SpaceEntryView() {
           <div className="card">
             <div className="card-header bg-warning text-white">Advertisement Identification</div>
             <div className="card-body">
-              <p><strong>Space Category:</strong> {space.rate} ({space.agent_rate_name})</p>
+              <p>
+                <strong>Space Category:</strong> {space.rate} {getAgentRateBadge(space.agent_rate_name)}
+              </p>
               <p><strong>Location:</strong> {space.location}</p>
               <p><strong>Street/Road Number:</strong> {space.stree_rd_no}</p>
               <p><strong>Section of Road:</strong> {space.section_of_rd}</p>
