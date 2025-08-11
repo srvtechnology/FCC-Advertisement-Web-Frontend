@@ -16,6 +16,11 @@ export default function Payments() {
   const [bookingIds, setBookingIds] = useState([]);
   const [selectedBookId, setSelectedBookId] = useState("");
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
+
   const [permissions, setPermissions] = useState({}); // step 2
   // step-3
   useEffect(() => {
@@ -40,6 +45,14 @@ export default function Payments() {
     fetchAgents();
   }, []);
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      getSpaces();
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [currentPage]); // Removed fromDate & toDate
+
   const fetchAgents = () => {
     axiosClient
       .get("/agent-list")
@@ -51,13 +64,17 @@ export default function Payments() {
     setLoading(true);
     axiosClient
       .get("/payments", {
-        params: { agent_name: selectedAgent, start_date: startDate, end_date: endDate, selectedBookId: selectedBookId },
+        params: {
+          page: currentPage,
+          limit: perPage, agent_name: selectedAgent, start_date: startDate, end_date: endDate, selectedBookId: selectedBookId
+        },
       })
       .then(({ data }) => {
         setLoading(false);
         setBookings(data.data || []);
         const ids = data.data.map((item) => item.booking_id);
         setBookingIds(ids);
+        setTotalPages(data.last_page || 1);
       })
       .catch(() => {
         setLoading(false);
@@ -195,81 +212,81 @@ export default function Payments() {
   return (
     <div>
       {can('manage_payment', 'list') && (
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="mb-0">Payments</h1>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h1 className="mb-0">Payments</h1>
 
-        <div className="d-flex gap-2">
+          <div className="d-flex gap-2">
 
-          {/* Booking Dropdown */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">Booking Id</label>
-            <select
-              value={selectedBookId}
-              onChange={(e) => setSelectedBookId(e.target.value)}
-              className="form-control form-control-sm"
-            >
-              <option value="">Select an option</option>
-              {bookingIds?.map((option, index) => (
-                <option key={index} value={option}>
-                  FCC/BK/{option}
-                </option>
-              ))}
-            </select>
+            {/* Booking Dropdown */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">Booking Id</label>
+              <select
+                value={selectedBookId}
+                onChange={(e) => setSelectedBookId(e.target.value)}
+                className="form-control form-control-sm"
+              >
+                <option value="">Select an option</option>
+                {bookingIds?.map((option, index) => (
+                  <option key={index} value={option}>
+                    FCC/BK/{option}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+
+            {/* Agent Dropdown */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">Agent</label>
+              <select
+                value={selectedAgent}
+                onChange={(e) => setSelectedAgent(e.target.value)}
+                className="form-control form-control-sm"
+              >
+                <option value="">Select an option</option>
+                {agents?.map((option, index) => (
+                  <option key={index} value={option?.name}>
+                    {option?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ width: "150px" }}
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="d-flex flex-column">
+              <label className="small text-muted">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ width: "150px" }}
+              />
+            </div>
+
+            {/* Search Button */}
+            <button className="btn btn-sm btn-success align-self-end" onClick={handleSearch}>
+              Search
+            </button>
+
+            {/* Bulk Export Button */}
+            <button className="btn btn-sm btn-warning align-self-end" onClick={downloadBulkExport}>
+              Export
+            </button>
           </div>
-
-
-          {/* Agent Dropdown */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">Agent</label>
-            <select
-              value={selectedAgent}
-              onChange={(e) => setSelectedAgent(e.target.value)}
-              className="form-control form-control-sm"
-            >
-              <option value="">Select an option</option>
-              {agents?.map((option, index) => (
-                <option key={index} value={option?.name}>
-                  {option?.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Start Date */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="form-control form-control-sm"
-              style={{ width: "150px" }}
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="d-flex flex-column">
-            <label className="small text-muted">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="form-control form-control-sm"
-              style={{ width: "150px" }}
-            />
-          </div>
-
-          {/* Search Button */}
-          <button className="btn btn-sm btn-success align-self-end" onClick={handleSearch}>
-            Search
-          </button>
-
-          {/* Bulk Export Button */}
-          <button className="btn btn-sm btn-warning align-self-end" onClick={downloadBulkExport}>
-            Export
-          </button>
         </div>
-      </div>
       )}
 
 
@@ -338,11 +355,11 @@ export default function Payments() {
                     </button>
                   </td> */}
                       <td>
-                      {can('manage_payment', 'view') && (
-                        <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => downloadReceipt(b.id)}>
-                          Receipt
-                        </button>
-                      )}
+                        {can('manage_payment', 'view') && (
+                          <button style={{ marginRight: "10px" }} className="btn btn-sm btn-primary w-24 text-center" onClick={() => downloadReceipt(b.id)}>
+                            Receipt
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -354,6 +371,28 @@ export default function Payments() {
               </tbody>
             )}
           </table>
+
+
+          {/* Pagination */}
+          <div className="d-flex justify-content-center align-items-center mt-3">
+            <button
+              className="btn btn-sm btn-primary me-2"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              &lt; Previous
+            </button>
+            <span className="fw-bold mx-2">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className="btn btn-sm btn-primary ms-2"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next &gt;
+            </button>
+          </div>
         </div>
       </div>
     </div>

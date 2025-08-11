@@ -36,6 +36,11 @@ export default function Bookings() {
   const [paidAmount, setPaidAmount] = useState(0);
   const [amountToPay, setAmountToPay] = useState(0);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
+
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
 
@@ -115,15 +120,25 @@ export default function Bookings() {
     getBookings();
   }, []);
 
+    useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      getBookings();
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [currentPage]);
+
   const getBookings = (agentName = "", startDate = "", endDate = "") => {
     setLoading(true);
     axiosClient
       .get("/bookings", {
-        params: { agent_name: selectedAgent, start_date: startDate, end_date: endDate },
+        params: {  page: currentPage,
+          limit: perPage, agent_name: selectedAgent, start_date: startDate, end_date: endDate },
       })
       .then(({ data }) => {
         setLoading(false);
         setBookings(data.data || []);
+        setTotalPages(data.last_page || 1);
       })
       .catch(() => {
         setLoading(false);
@@ -643,6 +658,28 @@ export default function Bookings() {
                   </tbody>
                 )}
             </table>
+
+
+            {/* Pagination */}
+            <div className="d-flex justify-content-center align-items-center mt-3">
+              <button
+                className="btn btn-sm btn-primary me-2"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                &lt; Previous
+              </button>
+              <span className="fw-bold mx-2">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="btn btn-sm btn-primary ms-2"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next &gt;
+              </button>
+            </div>
           </div>
         </div>
       </div>
